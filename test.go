@@ -110,3 +110,32 @@ func findCommonFree(durations [][]duration) [][2]int { // 10
 
 	return intervals
 }
+
+////////////////////////
+
+func checkChars(arr []int) bool {
+	stk := -1
+
+	for i, v := range arr {
+		if stk == 1 {
+			stk = -1 //pop
+			continue
+		} else { // empty stack
+			if v == 0 {
+				if i == len(arr)-1 { // last element is 0 and stk is empty
+					return true
+				}
+				continue
+			} else {
+				stk = v // 1
+			}
+		}
+	}
+	return false
+}
+
+// func main() {
+
+// 	opt := checkChars([]int{0, 0, 0, 0})
+// 	fmt.Println(opt)
+// }
