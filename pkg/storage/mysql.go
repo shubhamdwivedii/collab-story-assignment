@@ -206,9 +206,6 @@ func (s *MySQLStorage) UpdateSentence(sentenceId int32, word string) error {
 		} else {
 			// Nothing Finished Sentences is still less than 10.
 		}
-
-		// count is 10, UpdateParagraphISFinished
-		// Check if Story Finished
 	} else {
 		// Nothing Sentence can have more words
 	}
