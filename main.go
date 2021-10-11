@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	DB_URL := "root:hesoyam@tcp(127.0.0.1:3306)/collab"
+	DB_URL := "root:admin@tcp(127.0.0.1:3306)/collab"
 
 	storage, err := st.NewMySQLStorage(DB_URL)
 
