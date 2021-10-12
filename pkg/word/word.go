@@ -111,6 +111,12 @@ func validateWord(word string) error {
 	return nil
 }
 
+// Add mutex locking
+
+// Add Tests
+
+// Try to break further into modules
+
 /*
 Add Word
 	Find Unfinished Story
