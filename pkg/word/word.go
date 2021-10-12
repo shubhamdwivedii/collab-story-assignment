@@ -117,6 +117,10 @@ func validateWord(word string) error {
 
 // Try to break further into modules
 
+// break sql module into seperate files
+
+// export one struct with inclusion.
+
 /*
 Add Word
 	Find Unfinished Story
