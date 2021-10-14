@@ -120,22 +120,3 @@ func validateWord(word string) error {
 // break sql module into seperate files
 
 // export one struct with inclusion.
-
-/*
-Add Word
-	Find Unfinished Story
-		N - Create New Story - Add Word to Title
-		Y - Check if Title Finished
-			N - Add Word To Title
-			Y - Mark Title Finished - Find Unfinished Paragraph
-				N - Create New Paragraph - New Sentence - Add Word
-				Y - Find Unfinished Sentence
-					N - Create New Sentence - Add Word
-					Y - Add Word - Check if Sentence Full (15 Words)
-						N - Finished.
-						Y - Mark Sentence Finished - Check If Paragraph Full (10 Sentences)
-							N - Finished.
-							Y - Mark Paragraph Finished - Check If Story Full (7 Paragraphs)
-								N - Finished.
-								Y - Mark Story Finished.
-*/
