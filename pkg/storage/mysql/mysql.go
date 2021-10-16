@@ -12,15 +12,19 @@ import (
 const MySQLTimeFormat = "2006-01-02 15:04:05"
 
 type MySQLStorage struct {
-	db *sql.DB
+	db     *sql.DB
+	logger *log.Logger
 }
 
-func NewMySQLStorage(connection string) (*MySQLStorage, error) {
+func NewMySQLStorage(connection string, logger *log.Logger) (*MySQLStorage, error) {
 	var err error
 	s := new(MySQLStorage)
 	if s.db, err = initDb(connection); err != nil {
+		logger.Println("Error Connection to DB...", err)
 		return nil, err
 	}
+	logger.Println("Connected to DB successfully...")
+	s.logger = logger
 	return s, nil
 }
 
@@ -29,9 +33,8 @@ func initDb(connection string) (*sql.DB, error) {
 	// adding ?parseTime=true will parse sql's DATETIME to time.Time when scanning.
 
 	if err != nil {
-		log.Println("Unable to open connection to DB...", err.Error())
+		return nil, err
 	}
-	log.Println("Connected to DB successfully...")
 	return db, db.Ping()
 }
 

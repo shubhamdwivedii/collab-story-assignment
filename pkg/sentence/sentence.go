@@ -7,6 +7,6 @@ type Sentence struct {
 	Content    string
 }
 
-func (sentece *Sentence) Validate() error {
+func (sentence *Sentence) Validate() error {
 	return nil
 }

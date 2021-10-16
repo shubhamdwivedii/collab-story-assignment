@@ -70,6 +70,38 @@ func (s *MySQLStorage) GetParagraph(paragraphId int32) (*Paragraph, error) {
 	return &paragraph, nil
 }
 
+func GetStoryParagraphsTx(tx *sql.Tx, storyId int32) ([]Paragraph, error) {
+	var paragraphs []Paragraph
+
+	query := sq.Select("*").From("paragraphs").Where(sq.Eq{"story": storyId})
+
+	rows, err := query.RunWith(tx).Query()
+
+	if err != nil {
+		// tx.Rollback()
+		return nil, errors.New("Unexpected Error in Creating Query:" + err.Error())
+	}
+
+	for rows.Next() {
+		var paragraph Paragraph
+		var isFinished int32
+		err = rows.Scan(
+			&paragraph.ID,
+			&paragraph.Story,
+			&isFinished,
+		)
+
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+
+		paragraphs = append(paragraphs, paragraph)
+	}
+
+	return paragraphs, nil
+}
+
 func (s *MySQLStorage) GetUnfinishedParagraph(storyId int32) (*Paragraph, error) {
 	var paragraph Paragraph
 

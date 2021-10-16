@@ -11,3 +11,10 @@
 1. POST /add word 
 2. GET /stories list of stories 
 3. GET /sotires/:id details of story
+
+
+// Order TODO 
+
+1. Finish 3 HTTP services // use gorilla/mux for :id 
+2. Add response time check 
+3. Integrate Logger

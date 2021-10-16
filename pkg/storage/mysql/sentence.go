@@ -46,6 +46,62 @@ func (s *MySQLStorage) AddSentence(paragraphId int32, word string) (int32, error
 	return sentenceId, nil
 }
 
+func (s *MySQLStorage) GetSentence(sentenceId int32) (*Sentence, error) {
+	var sentence Sentence
+
+	query, args, err := sq.Select("*").From("sentences").Where(sq.Eq{"id": sentenceId}).ToSql()
+
+	if err != nil {
+		return nil, errors.New("Unexpected Error in Creating Query:" + err.Error())
+	}
+
+	var isFinished int
+
+	if err := s.db.QueryRow(query, args...).Scan(
+		&sentence.ID,
+		&sentence.Paragraph,
+		&isFinished,
+		&sentence.Content,
+	); err != nil {
+		return nil, errors.New("Cannot Find Sentence IN DB:" + err.Error())
+	}
+
+	if isFinished == 1 {
+		sentence.IsFinished = true
+	}
+
+	return &sentence, nil
+}
+
+func GetParagraphSentencesTx(tx *sql.Tx, paragraphId int32) ([]string, error) {
+	var sentences []string
+
+	query := sq.Select("content").From("sentences").Where(sq.Eq{"paragraph": paragraphId})
+
+	rows, err := query.RunWith(tx).Query()
+
+	if err != nil {
+		// tx.Rollback()
+		return nil, errors.New("Unexpected Error Creting query")
+	}
+
+	for rows.Next() {
+		var sentence string
+		err = rows.Scan(
+			&sentence,
+		)
+
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+
+		sentences = append(sentences, sentence)
+	}
+
+	return sentences, nil
+}
+
 func (s *MySQLStorage) GetUnfinishedSentence(paragraphId int32) (*Sentence, error) {
 	var sentence Sentence
 

@@ -3,6 +3,7 @@ package mysql
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"regexp"
 	"time"
@@ -59,6 +60,52 @@ func (s *MySQLStorage) GetStory(storyId int32) (*Story, error) {
 	return &story, nil
 }
 
+func (s *MySQLStorage) GetStoryDetail(storyId int32) (*StoryResponse, error) {
+	tx, err := s.NewTransaction()
+
+	if err != nil {
+		return nil, err
+	}
+
+	story, err := GetStoryTx(tx, storyId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	paragraphs, err := GetStoryParagraphsTx(tx, storyId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// iterate through paragraph ids and get all sentences content.
+	var paraBriefs []ParagraphBrief
+
+	for _, para := range paragraphs {
+		sentences, err := GetParagraphSentencesTx(tx, para.ID)
+		if err != nil {
+			return nil, err
+		}
+		paragraph := ParagraphBrief{
+			ID:        para.ID,
+			Sentences: sentences,
+		}
+
+		paraBriefs = append(paraBriefs, paragraph)
+	}
+
+	storyRes := StoryResponse{
+		ID:         story.ID,
+		Title:      story.Title,
+		CreatedAt:  story.CreatedAt,
+		UpdatedAt:  story.UpdatedAt,
+		Paragraphs: paraBriefs,
+	}
+
+	return &storyRes, nil
+}
+
 func (s *MySQLStorage) UpdateStoryTitle(storyid int32, word string) error {
 	tx, err := s.NewTransaction()
 
@@ -96,6 +143,74 @@ func (s *MySQLStorage) UpdateStoryTitle(storyid int32, word string) error {
 	}
 
 	return nil
+}
+
+func (s *MySQLStorage) GetAllStories(limit int32, offset int32) (*StoriesResponse, error) {
+	tx, err := s.NewTransaction()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var stories []StoryBrief
+
+	query := sq.Select("*").From("stories").Limit(uint64(limit)).Offset(uint64(offset))
+
+	rows, err := query.RunWith(tx).Query()
+
+	if err != nil {
+		// tx.Rollback()
+		return nil, err
+	}
+
+	for rows.Next() {
+		var story StoryBrief
+		var isFinished, titleAdded int32
+		err = rows.Scan(
+			&story.ID,
+			&story.Title,
+			&titleAdded,
+			&isFinished,
+			&story.CreatedAt,
+			&story.UpdatedAt,
+		)
+
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+
+		fmt.Println("appending story", story)
+		stories = append(stories, story)
+	}
+
+	qry, args, err := sq.Select("count(*) as count").From("stories").ToSql()
+
+	if err != nil {
+		tx.Rollback()
+		return nil, errors.New("Cannof Build Query for Count")
+	}
+
+	var count int32
+	if err := tx.QueryRow(qry, args...).Scan(
+		&count,
+	); err != nil {
+		tx.Rollback()
+		return nil, errors.New("Error getting count")
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, errors.New("Error Executing Transaction...")
+	} else {
+		storyRes := StoriesResponse{
+			Limit:   limit,
+			Offset:  offset,
+			Count:   count,
+			Results: stories,
+		}
+		fmt.Println("StoryRes", storyRes)
+		return &storyRes, nil
+	}
 }
 
 func (s *MySQLStorage) GetUnfinishedStory() (*Story, error) {
