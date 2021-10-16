@@ -33,7 +33,7 @@ func main() {
 	InfoLogger.Println("This is some info...")
 	ErrorLogger.Println("Some Error ?? HUH ??")
 
-	DB_URL := "root:hesoyam@tcp(127.0.0.1:3306)/collab"
+	DB_URL := "root:admin@tcp(127.0.0.1:3306)/collab"
 	storage, err := st.NewMySQLStorage(DB_URL, InfoLogger)
 	if err != nil {
 		log.Fatal("Error Initializing Storage: " + err.Error())
