@@ -7,7 +7,7 @@ import (
 	"time"
 
 	mux "github.com/gorilla/mux"
-
+	mw "github.com/shubhamdwivedii/collab-story-assignment/pkg/middlewares"
 	sv "github.com/shubhamdwivedii/collab-story-assignment/pkg/server"
 	st "github.com/shubhamdwivedii/collab-story-assignment/pkg/storage/mysql"
 	str "github.com/shubhamdwivedii/collab-story-assignment/pkg/story"
@@ -47,9 +47,9 @@ func main() {
 
 	service, err := sv.NewServer(wrdsrv, strsrv, InfoLogger)
 
-	router.HandleFunc("/add", service.AddWordHandler).Methods("POST")
-	router.HandleFunc("/stories", service.GetStoriesHandler).Methods("GET")
-	router.HandleFunc("/stories/{story}", service.GetStoryHandler).Methods("GET")
+	router.HandleFunc("/add", mw.ResponseTimeLogger(service.AddWordHandler, InfoLogger)).Methods("POST")
+	router.HandleFunc("/stories", mw.ResponseTimeLogger(service.GetStoriesHandler, InfoLogger)).Methods("GET")
+	router.HandleFunc("/stories/{story}", mw.ResponseTimeLogger(service.GetStoryHandler, InfoLogger)).Methods("GET")
 
 	server := &http.Server{
 		Handler:      router,
@@ -60,28 +60,4 @@ func main() {
 
 	log.Fatal(server.ListenAndServe())
 
-	// words := []string{
-	// 	"my", "story",
-	// 	"hello", "my", "name", "is", "Slim", "shady", "hi", "kids", "do", "you", "like", "violence", "wanna", "see", "magic",
-	// 	"hello", "my", "name", "is", "Slim", "shady", "hi", "kids", "do", "you", "like", "violence", "wanna", "see", "magic",
-	// 	"hello", "my", "name", "is", "Slim", "shady", "hi", "kids", "do", "you", "like", "violence", "wanna", "see", "magic",
-	// 	"hello", "my", "name", "is", "Slim", "shady", "hi", "kids", "do", "you", "like", "violence", "wanna", "see", "magic",
-	// 	"hello", "my", "name", "is", "Slim", "shady", "hi", "kids", "do", "you", "like", "violence", "wanna", "see", "magic",
-	// 	"hello", "my", "name", "is", "Slim", "shady", "hi", "kids", "do", "you", "like", "violence", "wanna", "see", "magic",
-	// 	"hello", "my", "name", "is", "Slim", "shady", "hi", "kids", "do", "you", "like", "violence", "wanna", "see", "magic",
-	// 	"hello", "my", "name", "is", "Slim", "shady", "hi", "kids", "do", "you", "like", "violence", "wanna", "see", "magic",
-	// 	"hello", "my", "name", "is", "Slim", "shady", "hi", "kids", "do", "you", "like", "violence", "wanna", "see", "magic",
-	// 	"hello", "my", "name", "is", "Slim", "shady", "hi", "kids", "do", "you", "like", "violence", "wanna", "see", "magic",
-	// 	"hello", "my", "name", "is", "Slim", "shady", "hi", "kids", "do", "you", "like", "violence", "wanna", "see", "magic",
-	// 	"hello", "my", "name", "is", "Slim", "shady", "hi", "kids", "do", "you", "like", "violence", "wanna", "see", "magic",
-	// 	"this", "is", "unfinished", "sentence",
-	// }
-
-	// for _, word := range words {
-	// 	err := wrdsrv.AddWord(word)
-	// 	if err != nil {
-	// 		log.Println("error adding Word", err.Error())
-	// 		break
-	// 	}
-	// }
 }
