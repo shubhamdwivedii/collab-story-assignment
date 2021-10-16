@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	st "github.com/shubhamdwivedii/collab-story-assignment/pkg/storage"
+	st "github.com/shubhamdwivedii/collab-story-assignment/pkg/storage/mysql"
 	ws "github.com/shubhamdwivedii/collab-story-assignment/pkg/word"
 )
 
