@@ -54,7 +54,7 @@ func NewWordService(storage WordStorage, logger *log.Logger) *WordService {
 }
 
 func ValidateWord(word string) error {
-	if len(word) < 1 || len(word) > 240 {
+	if len(word) < 1 || len(word) > 16 {
 		return errors.New("Invalid Word Length")
 	} else {
 		re, _ := regexp.Compile("^\\S+$")

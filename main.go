@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -22,12 +23,14 @@ var (
 
 func init() {
 	logger = logrus.New()
-	// file, err := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-	// if err != nil {
-	// 	log.Fatal(err.Error())
-	// }
-	debugMode := "TruE" //os.Getenv("VERLOOP_DEBUG")
-	logger.Out = os.Stdout
+	file, err := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+	// debugMode := "TruE"
+	debugMode := os.Getenv("VERLOOP_DEBUG")
+	mw := io.MultiWriter(os.Stdout, file)
+	logger.Out = mw
 	logger.SetFormatter(&logrus.TextFormatter{
 		DisableColors: false,
 		ForceColors:   true,
@@ -42,8 +45,8 @@ func init() {
 }
 
 func main() {
-	// DB_URL := os.Getenv("VERLOOP_DSN")
-	DB_URL := "root:hesoyam@tcp(127.0.0.1:3306)/collab"
+	DB_URL := os.Getenv("VERLOOP_DSN")
+	// DB_URL := "root:admin@tcp(127.0.0.1:3306)/collab"
 	storage, err := st.NewMySQLStorage(DB_URL, logger)
 	if err != nil {
 		logger.Fatal(err)
@@ -61,7 +64,7 @@ func main() {
 
 	httpServer := &http.Server{
 		Handler:      router,
-		Addr:         "127.0.0.1:8080",
+		Addr:         ":8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
