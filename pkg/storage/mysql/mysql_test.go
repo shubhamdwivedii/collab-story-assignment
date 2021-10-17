@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"os"
 	"testing"
 
 	log "github.com/sirupsen/logrus"
@@ -19,7 +20,8 @@ var (
 // Test in Separeate Test DB and Truncate Previous Test Data.
 
 func TestNewMySQLStorage(t *testing.T) {
-	connect := "root:admin@tcp(127.0.0.1:3306)/collab"
+	// connect := "root:admin@tcp(127.0.0.1:3306)/collab"
+	connect := os.Getenv("VERLOOP_DSN")
 	logger := log.New()
 	var err error
 	storage, err = NewMySQLStorage(connect, logger)
