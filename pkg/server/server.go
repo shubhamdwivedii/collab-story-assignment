@@ -1,43 +1,34 @@
-package service
+package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
-
-	str "github.com/shubhamdwivedii/collab-story-assignment/pkg/story"
-	wrd "github.com/shubhamdwivedii/collab-story-assignment/pkg/word"
+	str "github.com/shubhamdwivedii/collab-story/pkg/story"
+	wrd "github.com/shubhamdwivedii/collab-story/pkg/word"
+	log "github.com/sirupsen/logrus"
 )
 
-// type Service interface {
-// 	AddWord(word string) (*wrd.WordResponse, error)
-// 	GetAllStories(limit int32, offset int32) (*str.StoriesResponse, error)
-// }
-
 type Server struct {
-	wrdSrv *wrd.WordService
-	strSrv *str.StoryService
-	// router *mux.Router
-	logger *log.Logger
+	wordService  *wrd.WordService
+	storyService *str.StoryService
+	logger       *log.Logger
 }
 
-func NewServer(wrdSrv *wrd.WordService, strSrv *str.StoryService, logger *log.Logger) (*Server, error) {
-	// var err error
+func NewServer(wordService *wrd.WordService, storyService *str.StoryService, logger *log.Logger) (*Server, error) {
 	sv := new(Server)
-	sv.wrdSrv = wrdSrv
-	sv.strSrv = strSrv
+	sv.wordService = wordService
+	sv.storyService = storyService
 	sv.logger = logger
 	return sv, nil
 }
 
+// Adds a Word to Story/Paragraph/Sentence in Storage.
 func (s *Server) AddWordHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
-	// body is []byte
 
 	if err != nil {
 		s.RespondWithError(w, http.StatusInternalServerError, err.Error())
@@ -45,7 +36,6 @@ func (s *Server) AddWordHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	contentType := r.Header.Get("content-type")
-
 	if contentType != "application/json" {
 		s.RespondWithError(w, http.StatusUnsupportedMediaType, "content type 'application/json' required")
 		return
@@ -59,49 +49,53 @@ func (s *Server) AddWordHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	wrdRes, err := s.wrdSrv.AddWord(wrdReq.Word) // Also Verifies Word
+	wrdRes, err := s.wordService.AddWord(wrdReq.Word) // Also Verifies Word
 	if err != nil {
+		s.logger.Error("AddWord Failed:" + err.Error())
 		// s.RespondWithError(w, http.StatusBadRequest, err.Error())
 		wrdErr := wrd.WordError{Error: err.Error()}
 		s.RespondWithJSON(w, http.StatusBadRequest, wrdErr)
 		return
 	}
 
-	fmt.Println("WordRes", *wrdRes)
 	s.RespondWithJSON(w, http.StatusCreated, *wrdRes)
 }
 
+// Get All Stories from Storage
 func (s *Server) GetStoriesHandler(w http.ResponseWriter, r *http.Request) {
-	s.logger.Println("Story Get All Stories")
+	limitQry := r.URL.Query().Get("limit")
+	offsetQry := r.URL.Query().Get("offset")
 
-	storiesRes, err := s.strSrv.GetAllStories(5, 0)
+	limit, err := strconv.ParseInt(limitQry, 10, 32)
+	if err != nil {
+		limit = 10 // default value
+	}
+	offset, err := strconv.ParseInt(offsetQry, 10, 32)
+	if err != nil {
+		offset = 0 // default value
+	}
+
+	storiesRes, err := s.storyService.GetAllStories(int32(limit), int32(offset))
 
 	if err != nil {
 		s.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
 	s.RespondWithJSON(w, http.StatusAccepted, *storiesRes)
 	return
 }
 
+// Get Story by ID from Storage
 func (s *Server) GetStoryHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	storyId := vars["story"]
-	s.logger.Println("Story Get", storyId)
-
-	// get story by id
-	// get paragraphs by story id
-	// get sentences by paragraph id
-
 	id, err := strconv.ParseInt(storyId, 10, 32)
 
 	if err != nil {
 		s.RespondWithError(w, http.StatusBadRequest, "Invalid Id")
 	}
 
-	storyRes, err := s.strSrv.GetStoryDetail(int32(id))
-
+	storyRes, err := s.storyService.GetStoryDetail(int32(id))
 	s.RespondWithJSON(w, http.StatusCreated, *storyRes)
 }
 
@@ -112,7 +106,7 @@ func (s *Server) RespondWithError(w http.ResponseWriter, code int, msg string) {
 func (s *Server) RespondWithJSON(w http.ResponseWriter, code int, data interface{}) {
 	response, err := json.Marshal(data)
 	if err != nil {
-		s.logger.Println("Error Marshalling Response Data", err)
+		s.logger.Error("Error Marshalling Response Data", err)
 	}
 	w.Header().Add("content-type", "application/json")
 	w.WriteHeader(code)

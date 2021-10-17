@@ -2,6 +2,8 @@ package story
 
 import (
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type Story struct {
@@ -42,24 +44,28 @@ type ParagraphBrief struct {
 
 type StoryStorage interface {
 	GetAllStories(limit int32, offset int32) (*StoriesResponse, error)
-	GetStoryDetail(storyid int32) (*StoryResponse, error)
+	GetStoryDetail(storyId int32) (*StoryResponse, error)
 }
 
 type StoryService struct {
 	storage StoryStorage
+	logger  *log.Logger
 	// sync.Mutex // not needed for read only operation (tx implemented in sql)
 }
 
-func NewStoryService(storage StoryStorage) *StoryService {
+func NewStoryService(storage StoryStorage, logger *log.Logger) *StoryService {
 	strsrv := new(StoryService)
 	strsrv.storage = storage
+	strsrv.logger = logger
 	return strsrv
 }
 
 func (srv *StoryService) GetAllStories(limit int32, offset int32) (*StoriesResponse, error) {
+	// Add Some Metrics Here ? Or Some Business Logic
 	return srv.storage.GetAllStories(limit, offset)
 }
 
 func (srv *StoryService) GetStoryDetail(storyId int32) (*StoryResponse, error) {
+	// Add Some Metrics Here ? Or Some Business Logic
 	return srv.storage.GetStoryDetail(storyId)
 }

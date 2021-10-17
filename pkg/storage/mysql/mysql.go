@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log"
 
 	_ "github.com/go-sql-driver/mysql"
+	log "github.com/sirupsen/logrus"
 )
 
 const MySQLTimeFormat = "2006-01-02 15:04:05"
@@ -20,12 +20,21 @@ func NewMySQLStorage(connection string, logger *log.Logger) (*MySQLStorage, erro
 	var err error
 	s := new(MySQLStorage)
 	if s.db, err = initDb(connection); err != nil {
-		logger.Println("Error Connection to DB...", err)
+		logger.Error("Error Connection to DB...", err)
 		return nil, err
 	}
-	logger.Println("Connected to DB successfully...")
+	logger.Info("Connected to DB successfully...")
 	s.logger = logger
 	return s, nil
+}
+
+func (s *MySQLStorage) NewTransaction() (*sql.Tx, error) {
+	ctx := context.Background()
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, errors.New("Unexpected Error When Accessing DB..")
+	}
+	return tx, nil
 }
 
 func initDb(connection string) (*sql.DB, error) {
@@ -36,13 +45,4 @@ func initDb(connection string) (*sql.DB, error) {
 		return nil, err
 	}
 	return db, db.Ping()
-}
-
-func (s *MySQLStorage) NewTransaction() (*sql.Tx, error) {
-	ctx := context.Background()
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return nil, errors.New("Unexpected Error When Accessing DB..")
-	}
-	return tx, nil
 }

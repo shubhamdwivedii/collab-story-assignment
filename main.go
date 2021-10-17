@@ -1,63 +1,95 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	mux "github.com/gorilla/mux"
-	mw "github.com/shubhamdwivedii/collab-story-assignment/pkg/middlewares"
-	sv "github.com/shubhamdwivedii/collab-story-assignment/pkg/server"
-	st "github.com/shubhamdwivedii/collab-story-assignment/pkg/storage/mysql"
-	str "github.com/shubhamdwivedii/collab-story-assignment/pkg/story"
-	ws "github.com/shubhamdwivedii/collab-story-assignment/pkg/word"
+	mw "github.com/shubhamdwivedii/collab-story/pkg/middlewares"
+	sv "github.com/shubhamdwivedii/collab-story/pkg/server"
+	st "github.com/shubhamdwivedii/collab-story/pkg/storage/mysql"
+	str "github.com/shubhamdwivedii/collab-story/pkg/story"
+	wrd "github.com/shubhamdwivedii/collab-story/pkg/word"
 )
 
 var (
-	InfoLogger  *log.Logger
-	ErrorLogger *log.Logger
+	logger *logrus.Logger
 )
 
 func init() {
-	file, err := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-	if err != nil {
-		log.Fatal(err.Error())
+	logger = logrus.New()
+	// file, err := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	// if err != nil {
+	// 	log.Fatal(err.Error())
+	// }
+	debugMode := "TruE" //os.Getenv("VERLOOP_DEBUG")
+	logger.Out = os.Stdout
+	logger.SetFormatter(&logrus.TextFormatter{
+		DisableColors: false,
+		ForceColors:   true,
+		FullTimestamp: false,
+	})
+
+	if debugMode == "1" || strings.ToLower(debugMode) == "true" {
+		logger.Level = logrus.DebugLevel
+	} else {
+		logger.Level = logrus.FatalLevel
 	}
-	// InfoLogger = log.New(file, "INFO: ", log.LstdFlags|log.Lshortfile)
-	InfoLogger = log.New(os.Stdout, "INFO: ", log.LstdFlags|log.Lshortfile)
-	ErrorLogger = log.New(file, "ERROR: ", log.LstdFlags|log.Lshortfile)
 }
 
 func main() {
-	InfoLogger.Println("This is some info...")
-	ErrorLogger.Println("Some Error ?? HUH ??")
-
-	DB_URL := "root:admin@tcp(127.0.0.1:3306)/collab"
-	storage, err := st.NewMySQLStorage(DB_URL, InfoLogger)
+	// DB_URL := os.Getenv("VERLOOP_DSN")
+	DB_URL := "root:hesoyam@tcp(127.0.0.1:3306)/collab"
+	storage, err := st.NewMySQLStorage(DB_URL, logger)
 	if err != nil {
-		log.Fatal("Error Initializing Storage: " + err.Error())
+		logger.Fatal(err)
 	}
 
-	wrdsrv := ws.NewWordService(storage)
-
-	strsrv := str.NewStoryService(storage)
-
+	wordService := wrd.NewWordService(storage, logger)
+	storyService := str.NewStoryService(storage, logger)
 	router := mux.NewRouter()
 
-	service, err := sv.NewServer(wrdsrv, strsrv, InfoLogger)
+	server, err := sv.NewServer(wordService, storyService, logger)
 
-	router.HandleFunc("/add", mw.ResponseTimeLogger(service.AddWordHandler, InfoLogger)).Methods("POST")
-	router.HandleFunc("/stories", mw.ResponseTimeLogger(service.GetStoriesHandler, InfoLogger)).Methods("GET")
-	router.HandleFunc("/stories/{story}", mw.ResponseTimeLogger(service.GetStoryHandler, InfoLogger)).Methods("GET")
+	router.HandleFunc("/add", mw.DurationLogger(server.AddWordHandler, logger)).Methods("POST")
+	router.HandleFunc("/stories", mw.DurationLogger(server.GetStoriesHandler, logger)).Methods("GET")
+	router.HandleFunc("/stories/{story}", mw.DurationLogger(server.GetStoryHandler, logger)).Methods("GET")
 
-	server := &http.Server{
+	httpServer := &http.Server{
 		Handler:      router,
 		Addr:         "127.0.0.1:8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
 
-	log.Fatal(server.ListenAndServe())
+	logger.Fatal(httpServer.ListenAndServe())
 
+	// words := []string{
+	// 	"this", "story",
+	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
+	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
+	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
+	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
+	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
+	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
+	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
+	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
+	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
+	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
+	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
+	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
+	// 	"this", "is", "unfinished", "sentence",
+	// }
+
+	// for _, word := range words {
+	// 	err := wordService.AddWord(word)
+	// 	if err != nil {
+	// 		logger.Error("error adding Word", err.Error())
+	// 		break
+	// 	}
+	// }
 }

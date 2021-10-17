@@ -1,15 +1,16 @@
 package middlewares
 
 import (
-	"log"
 	"net/http"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
-func ResponseTimeLogger(next http.HandlerFunc, logger *log.Logger) http.HandlerFunc {
+func DurationLogger(next http.HandlerFunc, logger *logrus.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		startTime := time.Now()
 		next(w, r)
-		logger.Printf("Request Processed in %s", time.Now().Sub(startTime))
+		logger.Info("Request at \"%s\" Processed in %s", r.URL.Path, time.Now().Sub(startTime))
 	}
 }

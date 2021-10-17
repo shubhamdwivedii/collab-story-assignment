@@ -1,10 +1,10 @@
-1. Dockstrings 
-2. Dockerize (multi-stage build)
-3. Logging 
-4. ER diagram of DB 
-5. Functional and Unit Tests 
-6. Profile code (bottlenecks)
-7. Measure response time / requests per second. 
+1. Dockstrings - during rewrite 
+2. Dockerize (multi-stage build) - during rewrite 
+3. Logging - done - during rewrite 
+4. ER diagram of DB - last 
+5. Functional and Unit Tests - during rewrite 
+6. Profile code (bottlenecks) - ??? 
+7. Measure response time / requests per second. - done 
 
 
 
@@ -16,5 +16,5 @@
 // Order TODO 
 
 1. Finish 3 HTTP services // use gorilla/mux for :id - done 
-2. Add response time check 
-3. Integrate Logger
+2. Add response time check - done 
+3. Integrate Logger - half done 
