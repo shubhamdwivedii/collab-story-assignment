@@ -28,7 +28,7 @@ func init() {
 		logger.Fatal(err.Error())
 	}
 	// debugMode := "TruE"
-	debugMode := os.Getenv("VERLOOP_DEBUG")
+	debugMode := os.Getenv("LOGS_ENABLE")
 	mw := io.MultiWriter(os.Stdout, file)
 	logger.Out = mw
 	logger.SetFormatter(&logrus.TextFormatter{
@@ -45,7 +45,7 @@ func init() {
 }
 
 func main() {
-	DB_URL := os.Getenv("VERLOOP_DSN")
+	DB_URL := os.Getenv("DB_URL")
 	// DB_URL := "root:admin@tcp(127.0.0.1:3306)/collab"
 	storage, err := st.NewMySQLStorage(DB_URL, logger)
 	if err != nil {

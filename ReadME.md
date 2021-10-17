@@ -1,4 +1,4 @@
-# Collaborative Story Assignment (VERLOOP)
+# Collaborative Story Assignment
 
 ## Instructions To Run The Application: 
 
@@ -12,11 +12,11 @@
 ### 2. Locally (Without Docker)
 
 1. Make sure **MySQL** server is installed and running on local machine
-2. Set ENV variable `VERLOOP_DSN`
+2. Set ENV variable `DB_URL`
     ```
-    export VERLOOP_DSN="mysql://[user]:[password]@tcp([db_host]:3306)/[db_name]"
+    export DB_URL="mysql://[user]:[password]@tcp([db_host]:3306)/[db_name]"
     ```
-3. Optionally set ENV variable `VERLOOP_DEBUG=1` to enable logging. 
+3. Optionally set ENV variable `LOGS_ENABLE=1` to enable logging. 
 4. Build using `go build -o bin/server main.go`
 5. Run `./bin/server` 
 6. OR  Run `go run main.go` directly.

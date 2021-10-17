@@ -19,8 +19,8 @@ services:
     ports: 
       - 8080:8080
     environment: 
-      VERLOOP_DSN: root:admin@tcp(database)/collab
-      VERLOOP_DEBUG: 1 
+      DB_URL: root:admin@tcp(database)/collab
+      LOGS_ENABLE: 1 
     
     restart: unless-stopped 
 

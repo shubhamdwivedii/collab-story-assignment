@@ -21,7 +21,7 @@ var (
 
 func TestNewMySQLStorage(t *testing.T) {
 	// connect := "root:admin@tcp(127.0.0.1:3306)/collab"
-	connect := os.Getenv("VERLOOP_DSN")
+	connect := os.Getenv("DB_URL")
 	logger := log.New()
 	var err error
 	storage, err = NewMySQLStorage(connect, logger)
