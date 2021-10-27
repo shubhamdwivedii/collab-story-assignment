@@ -70,29 +70,4 @@ func main() {
 	}
 
 	logger.Fatal(httpServer.ListenAndServe())
-
-	// words := []string{
-	// 	"this", "story",
-	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
-	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
-	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
-	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
-	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
-	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
-	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
-	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
-	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
-	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
-	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
-	// 	"hello", "this", "here", "is", "random", "words", "hi", "people", "do", "you", "like", "sushi", "or", "ice", "cream",
-	// 	"this", "is", "unfinished", "sentence",
-	// }
-
-	// for _, word := range words {
-	// 	err := wordService.AddWord(word)
-	// 	if err != nil {
-	// 		logger.Error("error adding Word", err.Error())
-	// 		break
-	// 	}
-	// }
 }
